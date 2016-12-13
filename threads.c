@@ -14,11 +14,10 @@ int func(int argc)
 {
 	//variable=42;
 	char str[]="child thread with id ";
-	
+	char newline[]="\n";	
 	int n;
 	n=argc;
 	variable+=1;
-	write(STDOUT_FILENO, "biba\n", 5);
 
 	//Multiply matrix
 	
@@ -26,7 +25,7 @@ int func(int argc)
 
 
 	//convert int to char
-	/*char* c;
+	char* c;
 	c=(char *)malloc(10 * sizeof(char));
 	int v=0;
 	while (n > 9)
@@ -39,8 +38,7 @@ int func(int argc)
 	char t;
 	int i=0;
 	int j=0;
-	while (j<10)
-	{
+	
 		for (i=0; i<v/2;i++)
 		{
 			t=c[i];
@@ -48,11 +46,11 @@ int func(int argc)
 			c[v-1-i]=t;
 		}
 		j++;
-		write(1, str, strlen(str));
-		write(1, c, strlen(c));
-	}
+	write(1, str, strlen(str));
+	write(1, c, strlen(c));
+	write(1, newline, 2);
 	free(c);
-	*/
+
 	_exit(0);
 }
 
@@ -141,19 +139,25 @@ int main(int argc, char *argv[])
 
 
 	variable=0;
-	char* child_stack=(char *) malloc(16384);
-	child_stack += 16384 -1;
+	//char* child_stack=(char *) malloc(16384);
+	//child_stack += 16384 -1;
+	
+	long stacksize=1024;
+	void *stack;
+	//stack=malloc(stacksize);
+
 	printf("The variable was %d\n", variable);
 	char str[]="main thread is working";
         
-	for (i=0; i<10; i++)
+	for (i=1; i<10; i++)
 	{
-		clone(func, child_stack, CLONE_VM, i);
-		sleep(1);
-	//	printf("Created child thread with id %d\n", i);
+		stack=malloc(stacksize*i);
+		clone(func, stack+stacksize, CLONE_VM, i);
+		
+		printf("Created child thread with id %d\n", i);
 		
 	}
-	
+	sleep(2);	
 	printf("variable is %d\n", variable);
 	return 0;
 }
