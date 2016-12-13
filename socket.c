@@ -1,12 +1,15 @@
 #include <stdio.h>
+#include <fcntl.h>
+#include <sys/sendfile.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <strings.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <pthread.h>
 
-#define BUF_SIZE 256
+#define BUF_SIZE 65536
 
 int main(int argc, char ** argv)
 {
@@ -34,7 +37,7 @@ int main(int argc, char ** argv)
 		printf("bind() failed: %d\n", errno);
 		return EXIT_FAILURE;
 	}
-	listen(sock, 1);
+	listen(sock, 10);
 	clen = sizeof(cli_addr);
 	newsock = accept(sock, (struct sockaddr *) &cli_addr, &clen);
 	if (newsock < 0)
@@ -45,7 +48,8 @@ int main(int argc, char ** argv)
 	memset(buf, 0, BUF_SIZE);
 	read(newsock, buf, BUF_SIZE-1);
 	buf[BUF_SIZE] = 0;
-	printf("MSG: %s\n", buf);
+	printf("RECEIVED:\n%s\n", buf);
+	
 	write(newsock, "OK", 2);
 	close(newsock);
 	close(sock);
