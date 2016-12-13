@@ -1,33 +1,37 @@
-#include <stdlib.h>
+#define _GNU_SOURCE
 #include <stdio.h>
-#include <errno.h>
-#include <pthread.h>
-void * thread_func(void *arg)
+#include <unistd.h>
+#include <stdlib.h>
+#include <sched.h>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+int variable, fd;
+
+int func()
 {
-	int i;
-	int loc_id = * (int *) arg;
-	for (i=0; i<4; i++) {
-		printf("therad %i is running\n", loc id);
-		sleep(1);
-	}	
+	variable=42;
+	char str[]="child thread is working";
+	int len=strlen(str);
+	write(1, str, len);
+	_exit(0);
 }
-int main(int argc< char * argv[])
-{int id1, id2< result;
-	pthread_t thread1, thread2;
-id1=1;
-result=pthread_create(&thread1, NULL, thread_func, &id1);
-if (result!=0) {
-	perror("Creating the first thread");
-return EXIT_FAILURE;
-}
-id2=2;
-rsult=pthread_create(&thread2, NULL, thread_func, &id2);
-if (result!=0){
-perror("Ctreating the first thread");
-return EXIT_FAILURE;
-}
-result = pthread_join(thread1,NULL);
-result=pthread_join(thread2, NULL);
-printf("Done\n");
-return EXIT_SUCCESS;
+
+int main(int argc, char *argv[])
+{
+	//void **child_stack;
+	char tempch;
+	
+	variable=9;
+	char* child_stack=(char *) malloc(16384);
+	child_stack += 16384 -1;
+	printf("The variable was %d\n", variable);
+	char str[]="main thread is working";
+        write(1, str, strlen(str));
+	clone(func, child_stack, CLONE_VM, NULL);
+	sleep(1);
+	printf("variable is %d\n", variable);
+	return 0;
 }
