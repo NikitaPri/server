@@ -3,11 +3,12 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <sched.h>
-
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <signal.h>
 int variable, fd;
 
 int func(int argc)
@@ -59,7 +60,7 @@ int main(int argc, char *argv[])
 	//void **child_stack;
 	char tempch;
 	pid_t pid;	
-
+	int n_threads=200;
 	//Matrix
 	int i=0;
 	int j=0;
@@ -138,7 +139,7 @@ int main(int argc, char *argv[])
 
 
 
-	variable=0;
+	
 	//char* child_stack=(char *) malloc(16384);
 	//child_stack += 16384 -1;
 	
@@ -149,17 +150,20 @@ int main(int argc, char *argv[])
 	printf("The variable was %d\n", variable);
 	char str[]="main thread is working";
         
-	for (i=1; i<10; i++)
+	for (i=1; i<=n_threads; i++)
 	{
 		stack=malloc(stacksize*i);
-		pid=clone(func, stack+stacksize, CLONE_VM, i);
+		pid=clone(func, stack+stacksize, CLONE_VM | SIGCHLD, i);
 		
 		printf("Created child thread with id %d\n", i);
 		
 	}
-	int status;
-	waitpid(pid ,&status, 0);
-	//sleep(2);	
+
+	for (i=1; i<=n_threads; i++)
+	{
+		wait(NULL);
+	}
+	
 	printf("variable is %d\n", variable);
 	return 0;
 }
