@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 {
 	//void **child_stack;
 	char tempch;
-	
+	pid_t pid;	
 
 	//Matrix
 	int i=0;
@@ -152,12 +152,14 @@ int main(int argc, char *argv[])
 	for (i=1; i<10; i++)
 	{
 		stack=malloc(stacksize*i);
-		clone(func, stack+stacksize, CLONE_VM, i);
+		pid=clone(func, stack+stacksize, CLONE_VM, i);
 		
 		printf("Created child thread with id %d\n", i);
 		
 	}
-	sleep(2);	
+	int status;
+	waitpid(pid ,&status, 0);
+	//sleep(2);	
 	printf("variable is %d\n", variable);
 	return 0;
 }
