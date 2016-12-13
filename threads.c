@@ -55,10 +55,8 @@ int func(int argc, int agrv)
 	_exit(0);
 }
 
-int main(int argc, char *argv[]));
-        free(B);
-        free(C);
-
+int main(int argc, char *argv[]){
+        printf("%s\n", argv[1]);
 
 
 
@@ -93,7 +91,7 @@ int main(int argc, char *argv[]));
         //                                                                                                                                                                                return 0;
         //                                                                                                                                                                                }
         //
-{
+
 	//void **child_stack;
 	char tempch;
 	pid_t pid;	
