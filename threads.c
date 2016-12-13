@@ -9,16 +9,16 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <signal.h>
-int variable, fd;
+int N;
 
-int func(int argc)
+int func(int argc, int agrv)
 {
 	//variable=42;
 	char str[]="child thread with id ";
 	char newline[]="\n";	
 	int n;
 	n=argc;
-	variable+=1;
+	
 
 	//Multiply matrix
 	
@@ -55,16 +55,53 @@ int func(int argc)
 	_exit(0);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char *argv[]));
+        free(B);
+        free(C);
+
+
+
+
+
+
+
+        //char* child_stack=(char *) malloc(16384);
+        //        //child_stack += 16384 -1;
+        //
+        //                long stacksize=1024;
+        //                        void *stack;
+        //                                //stack=malloc(stacksize);
+        //
+        //                                        printf("The variable was %d\n");
+        //                                                char str[]="main thread is working";
+        //
+        //                                                        for (i=1; i<=n_threads; i++)
+        //                                                                {
+        //                                                                                stack=malloc(stacksize*i);
+        //                                                                                                pid=clone(func, stack+stacksize, CLONE_VM | SIGCHLD, i, stacksize);
+        //
+        //                                                                                                                printf("Created child thread with id %d\n", i);
+        //
+        //                                                                                                                        }
+        //
+        //                                                                                                                                for (i=1; i<=n_threads; i++)
+        //                                                                                                                                        {
+        //                                                                                                                                                        wait(NULL);
+        //                                                                                                                                                                }
+        //
+        //                                                                                                                                                                        printf("variable is %d\n");
+        //                                                                                                                                                                                return 0;
+        //                                                                                                                                                                                }
+        //
 {
 	//void **child_stack;
 	char tempch;
 	pid_t pid;	
-	int n_threads=200;
+	int n_threads=10;
 	//Matrix
 	int i=0;
 	int j=0;
-	int N=3;
+	N=3;
 	int k=0;
 	int **A=(int**)malloc(N * sizeof(int*));
 	int **B=(int**)malloc(N * sizeof(int*));
@@ -123,7 +160,16 @@ int main(int argc, char *argv[])
                 }
                 printf("\n");
         }
-
+	int elem;
+	int stroka;
+	int stolbec;
+	elem=8;
+	stroka=elem/N;
+	stolbec=elem-stroka*N;
+	int element=0;
+	element=C[stroka][stolbec];
+	
+	printf("element is %d\n", element);
 	for (i=0; i<N; i++)
 	{
 		free(A[i]);
@@ -147,13 +193,13 @@ int main(int argc, char *argv[])
 	void *stack;
 	//stack=malloc(stacksize);
 
-	printf("The variable was %d\n", variable);
+	printf("The variable was %d\n");
 	char str[]="main thread is working";
         
 	for (i=1; i<=n_threads; i++)
 	{
 		stack=malloc(stacksize*i);
-		pid=clone(func, stack+stacksize, CLONE_VM | SIGCHLD, i);
+		pid=clone(func, stack+stacksize, CLONE_VM | SIGCHLD, i, stacksize);
 		
 		printf("Created child thread with id %d\n", i);
 		
@@ -164,6 +210,6 @@ int main(int argc, char *argv[])
 		wait(NULL);
 	}
 	
-	printf("variable is %d\n", variable);
+	printf("variable is %d\n");
 	return 0;
 }
