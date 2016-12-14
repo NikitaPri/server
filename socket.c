@@ -49,7 +49,29 @@ int main(int argc, char ** argv)
 	read(newsock, buf, BUF_SIZE-1);
 	buf[BUF_SIZE] = 0;
 	printf("RECEIVED:\n%s\n", buf);
-	
+	char buff[4096];
+	FILE *in;
+	extern FILE *popen();
+	int len;
+	char command[65550];
+	len=snprintf(command, sizeof(command), "./threads %s", buf);
+	printf("%s\n", command);
+	char *pch=strstr(buf, "\n");
+	while(pch!=NULL)
+	{
+		strncpy(pch, "",1);
+		pch=strstr(buf, "\n");
+	}
+	printf("command is %s\n", buf);
+	if(!(in=popen(command, "r""")))
+	{
+		exit(1);
+	}
+	while(fgets(buff,sizeof(buff),in)!=NULL)
+	{
+		printf("%s\n",buff);
+	}
+	pclose(in);
 	write(newsock, "OK", 2);
 	close(newsock);
 	close(sock);
