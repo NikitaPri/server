@@ -11,6 +11,17 @@
 
 #define BUF_SIZE 65536
 
+void strip(char *s){
+	char *p2=s;
+	while(*s!='\0'){
+		if (*s!='\n'){
+			*p2++=*s++;
+		}else{
+			++s;
+		}
+	}
+	*p2='\0';
+}	
 int main(int argc, char ** argv)
 {
 	int sock, newsock, port, clen;
@@ -54,15 +65,21 @@ int main(int argc, char ** argv)
 	extern FILE *popen();
 	int len;
 	char command[65550];
+	
 	len=snprintf(command, sizeof(command), "./threads %s", buf);
-	printf("%s\n", command);
-	char *pch=strstr(buf, "\n");
-	while(pch!=NULL)
+	strip(command);//clear command from \n
+	char replace=';';
+	char replacewith=',';
+	int counter=0;
+	while(command[counter]!='\0')
 	{
-		strncpy(pch, "",1);
-		pch=strstr(buf, "\n");
+		if (command[counter]==replace)
+		{
+			command[counter]=replacewith;
+		}
+		counter++;
 	}
-	printf("command is %s\n", buf);
+	printf("command is %s\n",command);
 	if(!(in=popen(command, "r""")))
 	{
 		exit(1);
@@ -76,3 +93,4 @@ int main(int argc, char ** argv)
 	close(newsock);
 	close(sock);
 }
+
