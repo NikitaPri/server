@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <sched.h>
@@ -56,9 +57,23 @@ int func(int argc, int agrv)
 }
 
 int main(int argc, char *argv[]){
-        printf("%s\n", argv[1]);
-
-
+        char *token, *last;
+	char *raw_matrix;
+	raw_matrix=argv[1];
+	char rplc[1]=";";	
+	char del[1]=",";
+	int counter=0;
+	token=strtok_r(raw_matrix,del,&last);	
+	int N=atoi(token);
+	int A_matrix[N][N];
+	int B_matrix[N][N];
+	int C_matrix[N][N];
+	printf("first token is %d\n", N);
+	while(token!=NULL)	
+	{
+		printf("%s\n", token);
+		token=strtok_r(NULL,del, &last);
+	}
 
 
 
