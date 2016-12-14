@@ -11,7 +11,6 @@
 #include <unistd.h>
 #include <signal.h>
 int N;
-
 int func(int argc, int agrv)
 {
 	//variable=42;
@@ -55,6 +54,26 @@ int func(int argc, int agrv)
 
 	_exit(0);
 }
+int planner(int argc,int argv[][N*N]){
+	int n;
+	
+	n=argc;	
+	
+	//int *Plan=*argv;
+	int i=0;
+	int id=0;
+	int temp;
+	printf("is N%d\n", N);
+	for (i=0; i<N*N; i++)
+	{
+		id=i%n;
+		temp=argv[id][0];
+		argv[id][temp]=i;
+		argv[id][0]=argv[id][0]+1;
+		printf("Current state: id -- %d, argv[id][0] -- %d, i -- %d\n", id, temp,i);
+	}
+	return 0;
+}
 
 int main(int argc, char *argv[]){
         char *token, *last;
@@ -64,20 +83,36 @@ int main(int argc, char *argv[]){
 	char del[1]=",";
 	int counter=0;
 	token=strtok_r(raw_matrix,del,&last);	
-	int N=atoi(token);
-	int A_matrix[N][N];
-	int B_matrix[N][N];
-	int C_matrix[N][N];
+	N=atoi(token);
+	int A[N][N];
+	int B[N][N];
+	int C[N][N];
+	int Plan[N*N][N*N];
+	int c=0;
+	int s=0;
 	printf("first token is %d\n", N);
-	while(token!=NULL)	
+	/*while(token!=NULL)	
 	{
 		printf("%s\n", token);
 		token=strtok_r(NULL,del, &last);
+		
+	}*/
+	for (s=0;s<N;s++)
+	{
+		for (c=0;c<N;c++)
+		{
+			token=strtok_r(NULL,del,&last);
+			A[s][c]=atoi(token);
+		}	
 	}
-
-
-
-
+	for (s=0;s<N;s++)
+	{
+		for (c=0;c<N;c++)
+		{
+			token=strtok_r(NULL,del,&last);
+			B[s][c]=atoi(token);
+		}
+	}
         //char* child_stack=(char *) malloc(16384);
         //        //child_stack += 16384 -1;
         //
@@ -116,7 +151,7 @@ int main(int argc, char *argv[]){
 	int j=0;
 	N=3;
 	int k=0;
-	int **A=(int**)malloc(N * sizeof(int*));
+	/*int **A=(int**)malloc(N * sizeof(int*));
 	int **B=(int**)malloc(N * sizeof(int*));
 	int **C=(int**)malloc(N * sizeof(int*));
 	for (i=0; i<N; i++)
@@ -133,8 +168,9 @@ int main(int argc, char *argv[]){
 			B[i][j]=(i+j)*2;
 		}
 	}
-	
+	*/
 	//Multiply Matrix
+	/*
 	for(i=0; i<N; i++)
 	{
 		for (j=0; j<N; j++)
@@ -146,6 +182,7 @@ int main(int argc, char *argv[]){
 			}
 		}
 	}
+	*/
 	printf("matrix A\n");
 	for (i=0; i<N; i++)
 	{
@@ -176,28 +213,10 @@ int main(int argc, char *argv[]){
 	int elem;
 	int stroka;
 	int stolbec;
-	elem=8;
+	
 	stroka=elem/N;
 	stolbec=elem-stroka*N;
 	int element=0;
-	element=C[stroka][stolbec];
-	
-	printf("element is %d\n", element);
-	for (i=0; i<N; i++)
-	{
-		free(A[i]);
-		free(B[i]);
-		free(C[i]);
-	}
-	free(A);
-	free(B);
-	free(C);
-
-
-
-
-
-
 	
 	//char* child_stack=(char *) malloc(16384);
 	//child_stack += 16384 -1;
@@ -206,9 +225,17 @@ int main(int argc, char *argv[]){
 	void *stack;
 	//stack=malloc(stacksize);
 
-	printf("The variable was %d\n");
-	char str[]="main thread is working";
-        
+	
+	
+	n_threads=1;
+	planner(n_threads, Plan);
+	printf("Tasks\n");
+	for (i=0;i<N*N;i++){
+		for (j=0;j<N*N;j++){
+			printf("%d     ", Plan[i][j]);
+		}
+		printf("\n");
+	}	
 	for (i=1; i<=n_threads; i++)
 	{
 		stack=malloc(stacksize*i);
