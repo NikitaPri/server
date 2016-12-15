@@ -10,15 +10,14 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <signal.h>
+#include <time.h>
 int N;
 int NN;
-int *A_matrix[][];
-int *B_matrix[][];
-int *C_matrix[][];
-int *Plan_matrix[][];
-
-
-int 
+int *A_matrix;
+int *B_matrix;
+int *C_matrix;
+int *Plan_matrix;
+ 
 
 
 
@@ -28,39 +27,41 @@ int func(int argc, int agrv)
 	char str[]="child thread with id ";
 	char newline[]="\n";	
 	int n;
-	n=argc;
-	int *A[N][N];
+	n=argc-1;
+	/*int *A[N][N];
 	int *B[N][N];
 	int *C[N][N];
 	int *Plan[NN][NN];
 	A=A_matrix;
 	B=B_matrix;
 	C=C_matrix;
-	Plan=Plan_matrix;
+	Plan=Plan_matrix;*/
 	int pos=0;
 	int nel=0;
 	int elem=0;
 	int c=0;
 	int s=0;
 	int k=0;
-	nel=Plan[n][0];
+	//nel=Plan[n][0];
+	nel=*(Plan_matrix+n*NN);
 	for (pos=1;pos<=nel;pos++)
 	{
-		elem=Plan[n][pos];
+		elem=*(Plan_matrix+n*NN+pos);
 		s=elem/N;
 		c=elem-s*N;
 		for (k=0;k<N;k++)
 		{
-			C[s][c]=C[s][c]+A[s][k]*B[k][c];
+			*(C_matrix+s*N+c)+=(*(A_matrix+s*N+k))*(*(B_matrix+k*N+c));
 		}
 	}
-
+	
 	//Multiply matrix
 	
 
 
 
 	//convert int to char
+	/*
 	char* c;
 	c=(char *)malloc(10 * sizeof(char));
 	int v=0;
@@ -88,6 +89,7 @@ int func(int argc, int agrv)
 	free(c);
 
 	_exit(0);
+	*/
 }
 int planner(int argc,int argv[][NN]){
 	int n;
@@ -128,13 +130,13 @@ int main(int argc, char *argv[]){
 	int A[N][N];
 	int B[N][N];
 	int C[N][N];
-	A_matrix=*A;
-	B_matrix=*B;
-	C_matrix=*C;
+	A_matrix=A[0];
+	B_matrix=B[0];
+	C_matrix=C[0];
 	NN=N*N;
 	NN=NN+1;
 	int Plan[NN][NN];
-	Plan_matrix=*Plan;
+	Plan_matrix=Plan[0];
 	int c=0;
 	int s=0;
 	printf("first token is %d\n", N);
@@ -247,7 +249,8 @@ int main(int argc, char *argv[]){
                         printf("%d   ", B[i][j]);
                 }
                 printf("\n");
-        }	
+        }
+		
 	printf("matrix C\n");
 	        for (i=0; i<N; i++)
         {
@@ -267,43 +270,50 @@ int main(int argc, char *argv[]){
 	
 	//char* child_stack=(char *) malloc(16384);
 	//child_stack += 16384 -1;
-	
+	struct timespec tstart={0,0}, tend={0,0};	
 	long stacksize=1024;
 	void *stack;
 	//stack=malloc(stacksize);
 
-	
+	printf("*A_Matrix[2][1] is %d, *B_matrix[2][2] is %d\n", *(A_matrix+2*N+1), *(B_matrix+2*N+2));	
 		
-	n_threads=2;
-	planner(n_threads, Plan);
-	printf("Tasks\n");
-	for (i=0;i<NN;i++){
-		for (j=0;j<NN;j++){
-			printf("%d     ", Plan[i][j]);
-		}
+	//n_threads=9;
+	for (n_threads=1;n_threads<=N*N;n_threads++)
+	{
+		planner(n_threads, Plan);
+		printf("Tasks\n");
+		for (i=0;i<NN;i++)
+		{
+			for (j=0;j<NN;j++)
+			{
+				printf("%d     ", Plan[i][j]);
+			}
 		printf("\n");
-	}	
-	for (i=1; i<=n_threads; i++)
-	{
-		stack=malloc(stacksize*i);
-		pid=clone(func, stack+stacksize, CLONE_VM | SIGCHLD, i, stacksize);
+		}
+		clock_gettime(CLOCK_MONOTONIC, &tstart);
+		for (i=1; i<=n_threads; i++)
+		{
+			stack=malloc(stacksize*i);
+			pid=clone(func, stack+stacksize, CLONE_VM | SIGCHLD, i, stacksize);
 		
-		printf("Created child thread with id %d\n", i);
+			printf("Created child thread with id %d\n", i);
 		
-	}
-	for (i=1; i<=n_threads; i++)
-	{
-		wait(NULL);
-	}
-	printf("matrix C\n");
+		}
+		for (i=1; i<=n_threads; i++)
+		{
+			wait(NULL);
+		}
+		clock_gettime(CLOCK_MONOTONIC, &tend);
+		printf("time is %.5f\n", ((double)tend.tv_sec+1.0e-9*tend.tv_nsec)-((double)tstart.tv_sec+1.0e-9*tstart.tv_nsec));
+		printf("matrix C\n");
                 for (i=0; i<N; i++)
-        {
-                for (j=0; j<N; j++)
-                {
-                        printf("%d    ", C[i][j]);
-                }
-                printf("\n");
-        }
-	
+        	{
+                	for (j=0; j<N; j++)
+                	{
+                        	printf("%d    ", C[i][j]);
+                	}
+                	printf("\n");
+        	}
+	}
 	return 0;
 }
