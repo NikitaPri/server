@@ -89,7 +89,7 @@ int main(int argc, char ** argv)
 		printf("%s\n",buff);
 	}
 	pclose(in);
-	write(newsock, "OK", 2);
+	write(newsock, buff, strlen(buff));
 	close(newsock);
 	close(sock);
 }
