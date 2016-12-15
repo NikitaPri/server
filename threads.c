@@ -11,6 +11,17 @@
 #include <unistd.h>
 #include <signal.h>
 int N;
+int NN;
+int *A_matrix[][];
+int *B_matrix[][];
+int *C_matrix[][];
+int *Plan_matrix[][];
+
+
+int 
+
+
+
 int func(int argc, int agrv)
 {
 	//variable=42;
@@ -18,7 +29,31 @@ int func(int argc, int agrv)
 	char newline[]="\n";	
 	int n;
 	n=argc;
-	
+	int *A[N][N];
+	int *B[N][N];
+	int *C[N][N];
+	int *Plan[NN][NN];
+	A=A_matrix;
+	B=B_matrix;
+	C=C_matrix;
+	Plan=Plan_matrix;
+	int pos=0;
+	int nel=0;
+	int elem=0;
+	int c=0;
+	int s=0;
+	int k=0;
+	nel=Plan[n][0];
+	for (pos=1;pos<=nel;pos++)
+	{
+		elem=Plan[n][pos];
+		s=elem/N;
+		c=elem-s*N;
+		for (k=0;k<N;k++)
+		{
+			C[s][c]=C[s][c]+A[s][k]*B[k][c];
+		}
+	}
 
 	//Multiply matrix
 	
@@ -54,22 +89,28 @@ int func(int argc, int agrv)
 
 	_exit(0);
 }
-int planner(int argc,int argv[][N*N]){
+int planner(int argc,int argv[][NN]){
 	int n;
-	
 	n=argc;	
-	
-	//int *Plan=*argv;
 	int i=0;
 	int id=0;
-	int temp;
-	printf("is N%d\n", N);
+	int temp=0;
+	int j=0;
+	argv[0][0]=0;
+	for (i=0;i<NN;i++)
+	{	
+		for (j=0;j<NN; j++)
+		{
+			argv[i][j]=0;
+		}
+	}
+	printf("is n %d\n", n);
 	for (i=0; i<N*N; i++)
 	{
-		id=i%n;
+		id=i%n;	
+		argv[id][0]=argv[id][0]+1;
 		temp=argv[id][0];
 		argv[id][temp]=i;
-		argv[id][0]=argv[id][0]+1;
 		printf("Current state: id -- %d, argv[id][0] -- %d, i -- %d\n", id, temp,i);
 	}
 	return 0;
@@ -87,7 +128,13 @@ int main(int argc, char *argv[]){
 	int A[N][N];
 	int B[N][N];
 	int C[N][N];
-	int Plan[N*N][N*N];
+	A_matrix=*A;
+	B_matrix=*B;
+	C_matrix=*C;
+	NN=N*N;
+	NN=NN+1;
+	int Plan[NN][NN];
+	Plan_matrix=*Plan;
 	int c=0;
 	int s=0;
 	printf("first token is %d\n", N);
@@ -226,12 +273,12 @@ int main(int argc, char *argv[]){
 	//stack=malloc(stacksize);
 
 	
-	
-	n_threads=1;
+		
+	n_threads=2;
 	planner(n_threads, Plan);
 	printf("Tasks\n");
-	for (i=0;i<N*N;i++){
-		for (j=0;j<N*N;j++){
+	for (i=0;i<NN;i++){
+		for (j=0;j<NN;j++){
 			printf("%d     ", Plan[i][j]);
 		}
 		printf("\n");
@@ -244,12 +291,19 @@ int main(int argc, char *argv[]){
 		printf("Created child thread with id %d\n", i);
 		
 	}
-
 	for (i=1; i<=n_threads; i++)
 	{
 		wait(NULL);
 	}
+	printf("matrix C\n");
+                for (i=0; i<N; i++)
+        {
+                for (j=0; j<N; j++)
+                {
+                        printf("%d    ", C[i][j]);
+                }
+                printf("\n");
+        }
 	
-	printf("variable is %d\n");
 	return 0;
 }
