@@ -10,7 +10,7 @@
 #include <pthread.h>
 
 #define BUF_SIZE 65536
-
+#define n_clients 10
 void strip(char *s){
 	char *p2=s;
 	while(*s!='\0'){
@@ -24,7 +24,8 @@ void strip(char *s){
 }	
 int main(int argc, char ** argv)
 {
-	int sock, newsock, port, clen;
+
+	int sock, newsock, port, clen, pid;
 	char buf[BUF_SIZE];
 	struct sockaddr_in serv_addr, cli_addr;
 	if (argc < 2)
@@ -48,14 +49,39 @@ int main(int argc, char ** argv)
 		printf("bind() failed: %d\n", errno);
 		return EXIT_FAILURE;
 	}
-	listen(sock, 10);
+		
+	
+	listen(sock, n_clients);
 	clen = sizeof(cli_addr);
-	newsock = accept(sock, (struct sockaddr *) &cli_addr, &clen);
-	if (newsock < 0)
+	while(1)	
 	{
-		printf("accept() failde^ %d\n", errno);
-		return EXIT_FAILURE;
-	}
+		newsock = accept(sock, (struct sockaddr *) &cli_addr, &clen);
+		if (newsock < 0)
+		{
+			printf("accept() failde^ %d\n", errno);
+			return EXIT_FAILURE;
+		}
+		pid=fork();
+		if (pid<0)
+		{
+			perror("ERROR in fork()");
+			exit(1);
+		}
+		if (pid==0)
+		{
+			close(sock);
+			client(newsock);
+			exit(0);
+		}
+		else
+		{
+			close(newsock);
+		}
+	}	
+}
+void client(int newsock)
+{
+	char buf[BUF_SIZE];
 	memset(buf, 0, BUF_SIZE);
 	read(newsock, buf, BUF_SIZE-1);
 	buf[BUF_SIZE] = 0;
@@ -91,6 +117,5 @@ int main(int argc, char ** argv)
 	pclose(in);
 	write(newsock, buff, strlen(buff));
 	close(newsock);
-	close(sock);
 }
 
